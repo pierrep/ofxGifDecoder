@@ -11,8 +11,21 @@
 ofxGifFrame::ofxGifFrame(){
     left = top = 0;
     duration = 0.f;
+    bUseTexture = true;
 }
 
+void ofxGifFrame::setUseTexture( bool useTexture ){
+    if ( bUseTexture == useTexture ) return; // nothing to do
+    bUseTexture = useTexture;
+    // using texture now, make sure things are all good
+    
+    if ( bUseTexture ){
+        tx.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
+        tx.loadData(pixels);
+    } else {
+        tx.clear();
+    }
+}
 
 void ofxGifFrame::setFromPixels(ofPixels _px, int _left , int _top, float _duration){
     //rawPixels = _px;
@@ -20,8 +33,10 @@ void ofxGifFrame::setFromPixels(ofPixels _px, int _left , int _top, float _durat
     left      = _left;
     top       = _top;
     duration  = _duration;
-    tx.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
-    tx.loadData(pixels);
+    if ( bUseTexture ){
+        tx.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
+        tx.loadData(pixels);
+    }
 }
 
 void ofxGifFrame::setFromGifPixels(ofPixels _constructedPx, ofPixels _rawPx , int _left , int _top, float _duration){
@@ -31,8 +46,10 @@ void ofxGifFrame::setFromGifPixels(ofPixels _constructedPx, ofPixels _rawPx , in
     top      = _top;
     duration = _duration;
     
-    tx.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
-    tx.loadData(pixels);
+    if ( bUseTexture ){
+        tx.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
+        tx.loadData(pixels);
+    }
 }
 
 ofPixels * ofxGifFrame::getRawPixels(){
@@ -56,10 +73,18 @@ int ofxGifFrame::getTop(){
     return top;
 }
 
+float ofxGifFrame::getDuration(){
+    return duration;
+}
+
 void ofxGifFrame::draw(float _x, float _y){
     draw(_x, _y, getWidth(), getHeight());
 }
 
 void ofxGifFrame::draw(float _x, float _y, int _w, int _h){
+    if ( !bUseTexture ){
+        ofLogWarning()<<"ofxGifFrame::setUseTexture() set to false, cannot draw";
+        return;
+    }
     tx.draw(_x, _y, _w, _h);
 }

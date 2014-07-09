@@ -12,6 +12,8 @@
 
 ofxGifFile::ofxGifFile(){
     w = h = 0;
+    lastDrawn = 0;
+    frameIndex = 0;
 }
 
 ofxGifFile::~ofxGifFile(){}
@@ -24,11 +26,14 @@ void ofxGifFile::setup(int _w, int _h, vector<ofColor> _globalPalette, int _nPag
 }
 
 // by now we're copying everything (no pointers)
-void ofxGifFile::addFrame(ofPixels _px, int _left, int _top, GifFrameDisposal disposal, float _duration){
+void ofxGifFile::addFrame(ofPixels _px, int _left, int _top, bool useTexture, GifFrameDisposal disposal, float _duration){
     ofxGifFrame f;
 
     if(getNumFrames() == 0){
         accumPx = _px; // we assume 1st frame is fully drawn
+        if ( !useTexture ){
+            f.setUseTexture(false);
+        }
         f.setFromPixels(_px , _left, _top, _duration);
 		gifDuration = _duration;
     } else {
@@ -86,7 +91,10 @@ void ofxGifFile::addFrame(ofPixels _px, int _left, int _top, GifFrameDisposal di
                 }
             }
         }
-     
+        
+        if ( !useTexture ){
+            f.setUseTexture(false);
+        }
         f.setFromPixels(_px,_left, _top, _duration);
     }
     accumPx = _px;
@@ -108,7 +116,39 @@ float ofxGifFile::getDuration(){
 }
 
 void ofxGifFile::draw(float _x, float _y){
-    gifFrames[0].draw(_x, _y);
+    if ( getNumFrames() == 0 ){
+        ofLogWarning()<<"ofxGifFile::No frames to draw!";
+        return;
+    }
+    if ( getNumFrames() == 0 ){
+        ofLogWarning()<<"ofxGifFile::No frames to draw!";
+        return;
+    }
+    // never drawn, lets kick off
+    if ( lastDrawn == -1 ){
+        lastDrawn = ofGetElapsedTimef();
+    
+    } else if ( ofGetElapsedTimef() - lastDrawn >= gifFrames[frameIndex].getDuration() ){
+        frameIndex++;
+        frameIndex %= getNumFrames();
+    }
+    drawFrame( frameIndex, _x, _y );
+}
+
+void ofxGifFile::draw(float _x, float _y, float _w, float _h){
+    if ( getNumFrames() == 0 ){
+        ofLogWarning()<<"ofxGifFile::No frames to draw!";
+        return;
+    }
+    // never drawn, lets kick off
+    if ( lastDrawn == -1 ){
+        lastDrawn = ofGetElapsedTimef();
+    } else if ( ofGetElapsedTimef() - lastDrawn >= gifFrames[frameIndex].getDuration() ){
+        lastDrawn = ofGetElapsedTimef();
+        frameIndex++;
+        frameIndex %= getNumFrames();
+    }
+    drawFrame( frameIndex, _x, _y, _w, _h);
 }
 
 void ofxGifFile::drawFrame(int _frameNum, float _x, float _y){
@@ -143,9 +183,17 @@ int ofxGifFile::getNumFrames() {
 }
 
 ofxGifFrame * ofxGifFile::getFrameAt(int _index) {
-    return &(gifFrames[_index]); //??
+    if ( _index < getNumFrames() ){
+        return &(gifFrames[_index]); //??
+    } else {
+        ofLogWarning()<<"ofxGifFile:: trying to get frame that doesn't exist, returning NULL!";
+        return NULL;
+    }
 }
 
+vector <ofxGifFrame> & ofxGifFile::getFrames(){
+    return gifFrames;
+}
 
 vector <ofColor> ofxGifFile::getPalette(){
     return globalPalette;

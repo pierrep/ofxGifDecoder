@@ -28,30 +28,37 @@ class ofxGifFile {
         void setup(int _w, int _h, vector<ofColor> _globalPalette, int _nPages);
         void setBackgroundColor(ofColor _c);
         ofColor getBackgroundColor();
-        void addFrame(ofPixels _px, int _left , int _top, GifFrameDisposal disposal = GIF_DISPOSAL_PREVIOUS, float _duration = 0);
+        void addFrame(ofPixels _px, int _left , int _top, bool useTexture = true,
+                      GifFrameDisposal disposal = GIF_DISPOSAL_PREVIOUS, float _duration = 0);
         vector <ofColor> getPalette();
+    
         // void numFrames, void isAnimated, void duration
         int getNumFrames();
         int getWidth();
         int getHeight();
         float getDuration();
-		 
     
         ofxGifFrame * getFrameAt(int _index);
-    // array operator overload? 
+        vector <ofxGifFrame> & getFrames();
+    // array operator overload?
     // gif[1] is frame 1, and we can treat is as such
     // gif[1].getTop(); gif[1].draw() ...    
 
-        // void update
-        void draw(float _x, float _y);  
-        // this should draw with the offsets correctly applied. 
+        // draw with auto loop
+        void draw(float _x, float _y);
+        void draw(float _x, float _y, float _w, float _h);
+    
+        // this should draw with the offsets correctly applied.
         void drawFrame(int _frameNum, float _x, float _y); 
         void drawFrame(int _frameNum, float _x, float _y, int _w, int _h); 
         void clear();
         
     private:
+        // start of auto-playing gifs
+        float lastDrawn;
+        int frameIndex;
         ofColor bgColor;
-        vector <ofxGifFrame > gifFrames;
+        vector <ofxGifFrame> gifFrames;
         vector <ofImage> rawFrames;
         vector <ofColor> globalPalette;
         //vector <ofPixels *> rawPixels;

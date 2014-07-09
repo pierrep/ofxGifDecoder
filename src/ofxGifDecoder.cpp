@@ -13,10 +13,30 @@
 ofxGifDecoder::ofxGifDecoder(){
     globalPalette = NULL;
     globalPaletteSize = 0;
+    bNeedToUpdate = false;
+    ofAddListener(ofEvents().update, this, &ofxGifDecoder::update);
 }
 
-// return a bool if succesful?
-bool ofxGifDecoder::decode(string fileName) {
+ofxGifDecoder::~ofxGifDecoder(){
+    ofRemoveListener(ofEvents().update, this, &ofxGifDecoder::update);
+    waitForThread();
+}
+
+// required to update textures with threaded version
+void ofxGifDecoder::update( ofEventArgs & e ){
+    if ( bNeedToUpdate ){
+        // gif is loaded, switch all textures on
+        for ( auto & frame : gifFile.getFrames() ){
+            frame.setUseTexture(true);
+        }
+        
+        bNeedToUpdate = false;
+        ofNotifyEvent(onGifLoaded, gifFile, this);
+    }
+}
+
+// return a bool if succesful
+bool ofxGifDecoder::decode(string fileName, bool useTextures) {
     reset();
 	int width, height, bpp;
 	fileName                    = ofToDataPath(fileName);
@@ -48,7 +68,7 @@ bool ofxGifDecoder::decode(string fileName) {
                     createGifFile(dib, nPages);
                     bDecoded = true;   // we have at least 1 frame
                 }
-                processFrame(dib, i);
+                processFrame(dib, i, useTextures);
                 FreeImage_UnlockPage(multiBmp, dib, false);
             } else {
                 ofLog(OF_LOG_WARNING, "ofxGifDecoder::decode. problem locking page");
@@ -60,6 +80,25 @@ bool ofxGifDecoder::decode(string fileName) {
         ofLog(OF_LOG_WARNING, "ofxGifDecoder::decode. there was an error processing.");
 	}    
     return bDecoded;
+}
+
+void ofxGifDecoder::decodeThreaded(string fileName) {
+    // will smash if inside thread
+    reset();
+    
+    if ( isThreadRunning() ){
+        ofLogError()<<"ofxGifDecoder::Thread already running! Please wait till loaded";
+        return;
+    }
+    currentFile = fileName;
+    startThread();
+}
+
+void ofxGifDecoder::threadedFunction(){
+    bool success = decode(currentFile, false);
+    if ( success ){
+        bNeedToUpdate = true;
+    }
 }
 
 void ofxGifDecoder::createGifFile(FIBITMAP * bmp, int _nPages){
@@ -96,7 +135,7 @@ void ofxGifDecoder::createGifFile(FIBITMAP * bmp, int _nPages){
     }
 }
 
-void ofxGifDecoder::processFrame(FIBITMAP * bmp, int _frameNum){
+void ofxGifDecoder::processFrame(FIBITMAP * bmp, int _frameNum, bool useTexture){
     FITAG *tag;
     ofPixels pix;
 
@@ -157,7 +196,7 @@ void ofxGifDecoder::processFrame(FIBITMAP * bmp, int _frameNum){
             pix.swapRgb();
         #endif
         
-        gifFile.addFrame(pix, frameLeft, frameTop, disposal_method, frameDuration);
+        gifFile.addFrame(pix, frameLeft, frameTop, useTexture, disposal_method, frameDuration);
 	} else {
 		ofLogError() << "ofImage::putBmpIntoPixels() unable to set ofPixels from FIBITMAP";
 	}
@@ -171,6 +210,6 @@ void ofxGifDecoder::reset(){
 
 
 // should I return a pointer of a copy?
-ofxGifFile ofxGifDecoder::getFile() {
+ofxGifFile & ofxGifDecoder::getFile() {
     return gifFile;
 }

@@ -18,6 +18,7 @@ public:
     // eventually localPalette, interlaced, disposal method
     // for user
     void setFromPixels(ofPixels _px , int _left , int _top, float _duration = 0.f);
+    
     // for ofxGifFile 
     void setFromGifPixels(ofPixels _constructedPx, ofPixels _rawPx , int _left , int _top, float _duration = 0.f);
     void draw(float _x, float _y);
@@ -27,6 +28,10 @@ public:
     int getHeight();
     int getLeft();
     int getTop();
+    float getDuration();
+    
+    // texture stuff
+    void setUseTexture( bool useTexture );
     
 private:
     int top;
@@ -38,5 +43,5 @@ private:
     float duration;
     // optional
     vector<ofColor> palette;
-
+    bool bUseTexture;
 };
