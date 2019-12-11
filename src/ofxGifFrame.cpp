@@ -1,9 +1,8 @@
 //
 //  ofxGifFrame.cpp
-//  ofxGifDecoderAddon
 //
 //  Created by Jesus.Gollonet on 9/5/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Edited by Pierre Proske on 11/12/19
 //
 
 #include "ofxGifFrame.h"
@@ -15,12 +14,12 @@ ofxGifFrame::ofxGifFrame(){
 }
 
 void ofxGifFrame::setUseTexture( bool useTexture ){
-    if ( bUseTexture == useTexture ) return; // nothing to do
+    if ( bUseTexture == useTexture ) return;
+
     bUseTexture = useTexture;
-    // using texture now, make sure things are all good
     
     if ( bUseTexture ){
-        tex.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
+        tex.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGBA);
         tex.loadData(pixels);
     } else {
         tex.clear();

@@ -1,10 +1,10 @@
 //
 //  ofxGifFrame.h
-//  ofxGifDecoderAddon
 //
 //  Created by Jesus.Gollonet on 9/5/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Edited by Pierre Proske on 11/12/19
 //
+
 #pragma once
 
 
@@ -15,7 +15,6 @@ class ofxGifFrame{
 public:
     ofxGifFrame();
 
-    // eventually localPalette, interlaced, disposal method
     // for user
     void setFromPixels(ofPixels& _px , int _left , int _top, float _duration = 0.f);
     
@@ -39,9 +38,7 @@ private:
     ofPixels pixels;
     ofPixels rawPixels;
     ofTexture tex;
-    // optional
     float duration;
-    // optional
     vector<ofColor> palette;
     bool bUseTexture;
 };

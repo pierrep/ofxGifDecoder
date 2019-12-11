@@ -1,20 +1,18 @@
 //
 //  ofxGifDecoder.cpp
-//  gifPhasing
 //
 //  Created by Jesus Gollonet on 5/14/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Edited by Pierre Proske on 11/12/19
 //
 
 #include "ofxGifDecoder.h"
-//#include "FreeImage.h"
 
 ofxGifDecoder::ofxGifDecoder()
 {
     globalPalette = NULL;
     globalPaletteSize = 0;
     bNeedToUpdate = false;
-    defaultFrameDuration = 0.10f;
+    defaultFrameDuration = 0.04f;
     ofAddListener(ofEvents().update, this, &ofxGifDecoder::update);
 }
 
@@ -143,7 +141,7 @@ void ofxGifDecoder::createGifFile(FIBITMAP* bmp, int _nPages)
 
 void ofxGifDecoder::processFrame(FIBITMAP* bmp, int _frameNum, bool useTexture)
 {
-    FITAG* tag;
+    FITAG* tag = nullptr;
     ofPixels pix;
 
     unsigned int frameLeft, frameTop;
@@ -151,45 +149,49 @@ void ofxGifDecoder::processFrame(FIBITMAP* bmp, int _frameNum, bool useTexture)
     GifFrameDisposal disposal_method = GIF_DISPOSAL_BACKGROUND;
 
     if (FreeImage_GetMetadata(FIMD_ANIMATION, bmp, "FrameLeft", &tag)) {
-        frameLeft = *(unsigned short*)FreeImage_GetTagValue(tag);
-        ofLogVerbose() << "Frame Left:" << frameLeft;
-    }
-
-    if (FreeImage_GetMetadata(FIMD_ANIMATION, bmp, "FrameTop", &tag)) {
-        frameTop = *(unsigned short*)FreeImage_GetTagValue(tag);
-        ofLogVerbose() << "Frame Top:" << frameTop;
-    }
-
-    if (FreeImage_GetMetadata(FIMD_ANIMATION, bmp, "FrameTime", &tag)) {
-        const long frameTime = *(long*)FreeImage_GetTagValue(tag);
-        if (frameTime < 1000000) {
-            frameDuration = (float)(frameTime) / 1000.0f; // convert to milliseconds
-            defaultFrameDuration = frameDuration;
-        } else {
-            frameDuration = defaultFrameDuration;
+        if (tag != nullptr) {
+            frameLeft = *(unsigned short*)FreeImage_GetTagValue(tag);
+            ofLogVerbose() << "Frame Left:" << frameLeft;
         }
-        ofLogVerbose() << "Got GIF frame duration: " << frameDuration;
+    }
+
+    tag = nullptr;
+    if (FreeImage_GetMetadata(FIMD_ANIMATION, bmp, "FrameTop", &tag)) {
+        if (tag != nullptr) {
+            frameTop = *(unsigned short*)FreeImage_GetTagValue(tag);
+            ofLogVerbose() << "Frame Top:" << frameTop;
+        }
+    }
+
+    tag = nullptr;
+    if (FreeImage_GetMetadata(FIMD_ANIMATION, bmp, "FrameTime", &tag)) {
+        if (tag != nullptr) {
+            ofLogVerbose() << "tag type: " << FreeImage_GetTagType(tag);
+            ofLogVerbose() << "tag count: " << FreeImage_GetTagCount(tag);
+            const unsigned long frameTime = *(long*)FreeImage_GetTagValue(tag);
+            ofLogVerbose() << "Frame Time: " << frameTime;
+            if (frameTime < 1000000) {
+                frameDuration = (float)(frameTime) / 1000.0f; // convert to milliseconds
+                defaultFrameDuration = frameDuration;
+            } else {
+                frameDuration = defaultFrameDuration;
+            }
+            ofLogVerbose() << "Got GIF frame duration: " << frameDuration;
+        } else {
+            ofLogVerbose() << "GIF frame duration tag not found ";
+        }
     }
 
     if (FreeImage_GetMetadata(FIMD_ANIMATION, bmp, "DisposalMethod", &tag)) {
-        disposal_method = (GifFrameDisposal) * (unsigned char*)FreeImage_GetTagValue(tag);
+        if (tag != nullptr) {
+            disposal_method = (GifFrameDisposal) * (unsigned char*)FreeImage_GetTagValue(tag);
+        }
     }
-
-    // we do this for drawing. eventually we should be able to draw 8 bits? at least to retain the data
-    //    if(FreeImage_GetBPP(bmp) == 8) {
-    //        // maybe we should only do this when asked for rendering?
-    //        bmp = FreeImage_ConvertTo24Bits(bmp);
-    //    }
 
     FIBITMAP* bmpConverted = NULL;
     if (FreeImage_GetColorType(bmp) == FIC_PALETTE || FreeImage_GetBPP(bmp) < 8) {
-        //if (FreeImage_IsTransparent(bmp))
-        {
-            bmpConverted = FreeImage_ConvertTo32Bits(bmp);
-        }
-        //else {
-        //    bmpConverted = FreeImage_ConvertTo24Bits(bmp);
-        //}
+        // Force all incoming frames to be RGBA
+        bmpConverted = FreeImage_ConvertTo32Bits(bmp);
         bmp = bmpConverted;
     }
 
@@ -198,23 +200,23 @@ void ofxGifDecoder::processFrame(FIBITMAP* bmp, int _frameNum, bool useTexture)
     unsigned int bpp = FreeImage_GetBPP(bmp);
     unsigned int channels = (bpp / sizeof(unsigned char)) / 8;
     unsigned int pitch = FreeImage_GetPitch(bmp);
-
     ofLogVerbose() << "bpp: " << bpp << " channels: " << channels;
 
-    // ofPixels are top left, FIBITMAP is bottom left
-    FreeImage_FlipVertical(bmp);
+    FreeImage_FlipVertical(bmp);  // ofPixels are top left, FIBITMAP is bottom left
 
     unsigned char* bmpBits = FreeImage_GetBits(bmp);
 
     ofPixelFormat pixFormat;
-    if(channels==3) pixFormat=OF_PIXELS_BGR;
-    if(channels==4) pixFormat=OF_PIXELS_BGRA;
+    if (channels == 3)
+        pixFormat = OF_PIXELS_BGR;
+    if (channels == 4)
+        pixFormat = OF_PIXELS_BGRA;
 
     if (bmpBits != NULL) {
         pix.setFromAlignedPixels(bmpBits, width, height, pixFormat, pitch);
 
 #ifdef TARGET_LITTLE_ENDIAN
-        if(channels >=3) {
+        if (channels >= 3) {
             pix.swapRgb();
         }
 #endif

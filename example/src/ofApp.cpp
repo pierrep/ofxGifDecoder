@@ -2,9 +2,10 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    decoder.decode("star.gif");
+    ofSetLogLevel(OF_LOG_VERBOSE);
+    decoder.decode("skate.gif");
     file = decoder.getFile();
-    ofSetBackgroundAuto(false);
+
 }
 
 //--------------------------------------------------------------

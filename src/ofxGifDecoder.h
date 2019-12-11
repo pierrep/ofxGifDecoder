@@ -1,17 +1,15 @@
 //
 //  ofxGifDecoder.h
-//  gifPhasing
 //
 //  Created by Jesus Gollonet on 5/14/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Edited by Pierre Proske on 11/12/19
 //
+
 #pragma once
 #include "ofMain.h"
 #include "ofxGifFile.h"
-
 #include "FreeImage.h"
 
-// give it an animated gif and get a frame
 class ofxGifDecoder : protected ofThread {
 public:
     ofxGifDecoder();

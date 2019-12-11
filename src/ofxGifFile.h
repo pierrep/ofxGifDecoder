@@ -1,9 +1,8 @@
 //
 //  ofxGifFile.h
-//  ofxGifDecoderAddon
 //
 //  Created by Jesus.Gollonet on 9/5/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Edited by Pierre Proske on 11/12/19
 //
 
 #pragma once

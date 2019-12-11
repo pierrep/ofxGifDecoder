@@ -1,9 +1,8 @@
 //
 //  ofxGifFile.cpp
-//  ofxGifDecoderAddon
 //
 //  Created by Jesus.Gollonet on 9/5/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Edited by Pierre Proske on 11/12/19
 //
 
 #include "ofxGifFile.h"
@@ -25,7 +24,6 @@ void ofxGifFile::setup(int _w, int _h, vector<ofColor> _globalPalette, int _nPag
     nPages = _nPages;
 }
 
-// by now we're copying everything (no pointers)
 void ofxGifFile::addFrame(ofPixels _px, unsigned int _left, unsigned int _top, bool useTexture, GifFrameDisposal disposal, float _duration)
 {
     ofxGifFrame f;
@@ -42,7 +40,6 @@ void ofxGifFile::addFrame(ofPixels _px, unsigned int _left, unsigned int _top, b
         unsigned int cropOriginX = _left;
         unsigned int cropOriginY = _top;
 
-        // [todo] make this loop only travel through _px, not accumPx
         for (unsigned int i = 0; i < accumPx.getWidth() * accumPx.getHeight(); i++) {
             unsigned int x = i % accumPx.getWidth();
             unsigned int y = i / accumPx.getWidth();
