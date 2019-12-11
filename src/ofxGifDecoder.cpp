@@ -14,6 +14,7 @@ ofxGifDecoder::ofxGifDecoder(){
     globalPalette = NULL;
     globalPaletteSize = 0;
     bNeedToUpdate = false;
+    defaultFrameDuration = 0.10f;
     ofAddListener(ofEvents().update, this, &ofxGifDecoder::update);
 }
 
@@ -59,6 +60,7 @@ bool ofxGifDecoder::decode(string fileName, bool useTextures) {
 
         // num frames
         int nPages = FreeImage_GetPageCount(multiBmp);
+        ofLogNotice() << "Gif frames: " << nPages;
         
         // here we process the first frame
         for (int i = 0; i < nPages; i++) {
@@ -152,8 +154,14 @@ void ofxGifDecoder::processFrame(FIBITMAP * bmp, int _frameNum, bool useTexture)
     }
     
     if( FreeImage_GetMetadata(FIMD_ANIMATION, bmp, "FrameTime", &tag)) {
-        long frameTime = *(long *)FreeImage_GetTagValue(tag);// centiseconds 1/100 sec
-        frameDuration =(float)frameTime/1000.f;
+        const long frameTime = *(long *)FreeImage_GetTagValue(tag);
+        if(frameTime < 1000000) {
+            frameDuration = (float)(frameTime)/1000.0f; // convert to milliseconds
+            defaultFrameDuration = frameDuration;
+        } else {
+            frameDuration = defaultFrameDuration;
+        }
+        ofLogVerbose() << "Got GIF frame duration: " << frameDuration;
     }
     
     if( FreeImage_GetMetadata(FIMD_ANIMATION, bmp, "DisposalMethod", &tag)) {

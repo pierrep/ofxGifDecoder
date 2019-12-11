@@ -2,8 +2,8 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    decoder.decode("dvdp.gif");
-    file = decoder.getFile();
+    decoder.decode("alpha.gif");
+    file = decoder.getFile();    
 }
 
 //--------------------------------------------------------------
@@ -13,8 +13,7 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    float normalX = float(ofGetMouseX()) /ofGetWidth();
-    file.drawFrame(normalX * file.getNumFrames(), 0 ,  0);
+    file.draw(0,0);
 }
 
 //--------------------------------------------------------------

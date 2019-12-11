@@ -27,14 +27,13 @@ void ofxGifFrame::setUseTexture( bool useTexture ){
     }
 }
 
-void ofxGifFrame::setFromPixels(ofPixels _px, int _left , int _top, float _duration){
-    //rawPixels = _px;
+void ofxGifFrame::setFromPixels(ofPixels& _px, int _left , int _top, float _duration){
     pixels    = _px;
     left      = _left;
     top       = _top;
     duration  = _duration;
+
     if ( bUseTexture ){
-        tx.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
         tx.loadData(pixels);
     }
 }
@@ -47,7 +46,6 @@ void ofxGifFrame::setFromGifPixels(ofPixels _constructedPx, ofPixels _rawPx , in
     duration = _duration;
     
     if ( bUseTexture ){
-        tx.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
         tx.loadData(pixels);
     }
 }

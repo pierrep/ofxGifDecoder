@@ -54,6 +54,8 @@ class ofxGifFile {
         void clear();
         
     private:
+        void updateFrameIndex();
+
         // start of auto-playing gifs
         float lastDrawn;
         int frameIndex;

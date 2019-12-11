@@ -49,6 +49,6 @@ private :
     
     int globalPaletteSize;
     RGBQUAD * globalPalette;
-    
+    float defaultFrameDuration;
 
 };

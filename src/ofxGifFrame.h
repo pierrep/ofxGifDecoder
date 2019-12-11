@@ -17,7 +17,7 @@ public:
 
     // eventually localPalette, interlaced, disposal method
     // for user
-    void setFromPixels(ofPixels _px , int _left , int _top, float _duration = 0.f);
+    void setFromPixels(ofPixels& _px , int _left , int _top, float _duration = 0.f);
     
     // for ofxGifFile 
     void setFromGifPixels(ofPixels _constructedPx, ofPixels _rawPx , int _left , int _top, float _duration = 0.f);
