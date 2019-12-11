@@ -28,7 +28,7 @@ class ofxGifFile {
         void setup(int _w, int _h, vector<ofColor> _globalPalette, int _nPages);
         void setBackgroundColor(ofColor _c);
         ofColor getBackgroundColor();
-        void addFrame(ofPixels _px, int _left , int _top, bool useTexture = true,
+        void addFrame(ofPixels _px, unsigned int _left , unsigned int _top, bool useTexture = true,
                       GifFrameDisposal disposal = GIF_DISPOSAL_PREVIOUS, float _duration = 0);
         vector <ofColor> getPalette();
     

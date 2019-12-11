@@ -26,7 +26,7 @@ void ofxGifFile::setup(int _w, int _h, vector<ofColor> _globalPalette, int _nPag
 }
 
 // by now we're copying everything (no pointers)
-void ofxGifFile::addFrame(ofPixels _px, int _left, int _top, bool useTexture, GifFrameDisposal disposal, float _duration)
+void ofxGifFile::addFrame(ofPixels _px, unsigned int _left, unsigned int _top, bool useTexture, GifFrameDisposal disposal, float _duration)
 {
     ofxGifFrame f;
 
@@ -39,67 +39,46 @@ void ofxGifFile::addFrame(ofPixels _px, int _left, int _top, bool useTexture, Gi
         gifDuration = _duration;
     } else {
         // add new pixels to accumPx
-        int cropOriginX = _left;
-        int cropOriginY = _top;
+        unsigned int cropOriginX = _left;
+        unsigned int cropOriginY = _top;
 
         // [todo] make this loop only travel through _px, not accumPx
-        for (int i = 0; i < accumPx.getWidth() * accumPx.getHeight(); i++) {
-            int x = i % accumPx.getWidth();
-            int y = i / accumPx.getWidth();
+        for (unsigned int i = 0; i < accumPx.getWidth() * accumPx.getHeight(); i++) {
+            unsigned int x = i % accumPx.getWidth();
+            unsigned int y = i / accumPx.getWidth();
 
-            if (x >= _left && x < _left + _px.getWidth() && y >= _top && y < _top + _px.getHeight()) {
-                int cropX = x - cropOriginX; //   (i - _left) % _px.getWidth();
-                int cropY = y - cropOriginY;
-                //int cropI = cropX + cropY * _px.getWidth();
-                if (_px.getColor(cropX, cropY).a == 0) {
-                    switch (disposal) {
-                    case GIF_DISPOSAL_BACKGROUND:
-                        _px.setColor(x, y, bgColor);
-                        break;
+            if ((x >= _left) && (x < _left + _px.getWidth()) && (y >= _top) && (y < _top + _px.getHeight())) {
+                unsigned int cropX = x - cropOriginX;
+                unsigned int cropY = y - cropOriginY;
 
-                    case GIF_DISPOSAL_LEAVE:
-                    case GIF_DISPOSAL_UNSPECIFIED:
-                        _px.setColor(x, y, accumPx.getColor(cropX, cropY));
-                        //                            accumPx.setColor(x,y,_px.getColor(cropX, cropY));
-                        break;
-
-                    case GIF_DISPOSAL_PREVIOUS:
-                        _px.setColor(x, y, accumPx.getColor(cropX, cropY));
-                        break;
-                    }
-                } else {
-                    accumPx.setColor(x, y, _px.getColor(cropX, cropY));
-                }
-            } else {
-                if (_px.getColor(x, y) == bgColor) {
+                unsigned int alpha = _px.getColor(cropX, cropY).a;
+                if (alpha < 255) {
                     switch (disposal) {
                     case GIF_DISPOSAL_BACKGROUND:
                         accumPx.setColor(x, y, bgColor);
                         break;
 
+                    case GIF_DISPOSAL_LEAVE: // leave pixels as per previous frame
                     case GIF_DISPOSAL_UNSPECIFIED:
-                    case GIF_DISPOSAL_LEAVE:
-                        accumPx.setColor(x, y, _px.getColor(x, y));
                         break;
 
                     case GIF_DISPOSAL_PREVIOUS:
-                        _px.setColor(x, y, accumPx.getColor(x, y));
+                        ofLogError() << "GIF_DISPOSAL_PREVIOUS not yet implemented";
                         break;
                     }
                 } else {
-                    accumPx.setColor(x, y, _px.getColor(x, y));
+                    accumPx.setColor(x, y, _px.getColor(cropX, cropY));
                 }
             }
+
         }
 
         if (!useTexture) {
             f.setUseTexture(false);
         }
-        f.setFromPixels(_px, _left, _top, _duration);
+        f.setFromPixels(accumPx, _left, _top, _duration);
     }
-    accumPx = _px;
 
-    //
     gifFrames.push_back(f);
 }
 

@@ -20,10 +20,10 @@ void ofxGifFrame::setUseTexture( bool useTexture ){
     // using texture now, make sure things are all good
     
     if ( bUseTexture ){
-        tx.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
-        tx.loadData(pixels);
+        tex.allocate(pixels.getWidth(), pixels.getHeight(), GL_RGB); // rgb for now
+        tex.loadData(pixels);
     } else {
-        tx.clear();
+        tex.clear();
     }
 }
 
@@ -34,7 +34,7 @@ void ofxGifFrame::setFromPixels(ofPixels& _px, int _left , int _top, float _dura
     duration  = _duration;
 
     if ( bUseTexture ){
-        tx.loadData(pixels);
+        tex.loadData(pixels);
     }
 }
 
@@ -46,7 +46,7 @@ void ofxGifFrame::setFromGifPixels(ofPixels _constructedPx, ofPixels _rawPx , in
     duration = _duration;
     
     if ( bUseTexture ){
-        tx.loadData(pixels);
+        tex.loadData(pixels);
     }
 }
 
@@ -84,5 +84,5 @@ void ofxGifFrame::draw(float _x, float _y, int _w, int _h){
         ofLogWarning()<<"ofxGifFrame::setUseTexture() set to false, cannot draw";
         return;
     }
-    tx.draw(_x, _y, _w, _h);
+    tex.draw(_x, _y, _w, _h);
 }

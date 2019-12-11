@@ -38,7 +38,7 @@ private:
     int left;
     ofPixels pixels;
     ofPixels rawPixels;
-    ofTexture tx;
+    ofTexture tex;
     // optional
     float duration;
     // optional

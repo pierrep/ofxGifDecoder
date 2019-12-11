@@ -2,8 +2,9 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    decoder.decode("alpha.gif");
-    file = decoder.getFile();    
+    decoder.decode("star.gif");
+    file = decoder.getFile();
+    ofSetBackgroundAuto(false);
 }
 
 //--------------------------------------------------------------
